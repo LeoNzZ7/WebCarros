@@ -6,7 +6,7 @@ export const Home = () => {
             <section className="bg-white p-4 rounded-lg w-full max-w-3xl mx-auto flex justify-center items-center gap" >
                 <input
                     className="w-full border-2 rounded-lg h-9 px-3 outline-none rounded-r-none border-r-0"
-                    type="text"
+                    type="search"
                     placeholder="Digite o nome do veiculo" />
                 <button className="bg-red-500 h-9 px-8 rounded-lg rounded-l-none font-medium transition-colors hover:bg-red-600 text-white" >Buscar</button>
             </section>

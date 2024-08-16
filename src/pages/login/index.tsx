@@ -29,23 +29,35 @@ export const Login = () => {
                 <Link to="/" className="mb-6 max-w-sm w-full" >
                     <img src={logoImg} alt="Logo do site" className="w-full" />
                 </Link>
-                <form onSubmit={handleSubmit(onSubmit)} className="bg-white max-w-xl w-full rounded-lg" >
-                    <Input
-                        type="email"
-                        placeholder="Digite seu email "
-                        name="email"
-                        error={errors.email?.message}
-                        register={register}
-                    />
-                    <Input
-                        type="password"
-                        placeholder="Digite sua senha "
-                        name="password"
-                        error={errors.password?.message}
-                        register={register}
-                    />
-                    <button typeof="submit" >Acessar</button>
+                <form onSubmit={handleSubmit(onSubmit)} className="bg-white max-w-xl w-full rounded-lg p-5" >
+                    <div className="mb-3" >
+                        <Input
+                            type="email"
+                            placeholder="Digite seu email "
+                            name="email"
+                            error={errors.email?.message}
+                            register={register}
+                        />
+                    </div>
+                    <div className="mb-3" >
+                        <Input
+                            type="password"
+                            placeholder="Digite sua senha "
+                            name="password"
+                            error={errors.password?.message}
+                            register={register}
+                        />
+                    </div>
+                    <button
+                        className="bg-zinc-900 w-full rounded-md text-white h-10 font-medium"
+                        type="submit"
+                    >
+                        Acessar
+                    </button>
                 </form>
+                <Link to="/register" >
+                    Ainda não tem uma conta? cadastra-se
+                </Link>
             </div>
         </Container>
     )
