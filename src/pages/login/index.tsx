@@ -33,10 +33,10 @@ export const Login = () => {
                     <div className="mb-3" >
                         <Input
                             type="email"
-                            placeholder="Enter your email"
+                            placeholder="Digite seu email "
                             name="email"
-                            register={register}
                             error={errors.email?.message}
+                            register={register}
                         />
                     </div>
                     <div className="mb-3" >
@@ -55,9 +55,6 @@ export const Login = () => {
                         Acessar
                     </button>
                 </form>
-                <Link to="/register" >
-                    Ainda não tem uma conta? cadastra-se
-                </Link>
             </div>
         </Container>
     )

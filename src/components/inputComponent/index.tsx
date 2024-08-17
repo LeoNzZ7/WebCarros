@@ -1,22 +1,15 @@
 import { RegisterOptions, UseFormRegister } from 'react-hook-form'
 
-interface InputProps<T extends Record<string, unknown>> {
+interface InputProps {
   type: string;
   placeholder: string;
   name: string;
-  register: UseFormRegister<T>;
+  register: UseFormRegister<any>;
   error?: string;
   rules?: RegisterOptions;
 }
 
-export function Input<T extends Record<string, unknown>>({
-  name,
-  placeholder,
-  type,
-  register,
-  rules,
-  error
-}: InputProps<T>) {
+export function Input({ name, placeholder, type, register, rules, error }: InputProps) {
   return (
     <div>
       <input
