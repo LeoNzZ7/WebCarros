@@ -1,16 +1,23 @@
-import { RegisterOptions, UseFormRegister} from 'react-hook-form'
+import { RegisterOptions, UseFormRegister } from 'react-hook-form'
 
-interface InputProps{
+interface InputProps<T extends Record<string, unknown>> {
   type: string;
   placeholder: string;
   name: string;
-  register: UseFormRegister<any>;
+  register: UseFormRegister<T>;
   error?: string;
   rules?: RegisterOptions;
 }
 
-export function Input({ name, placeholder, type, register, rules, error }: InputProps){
-  return(
+export function Input<T extends Record<string, unknown>>({
+  name,
+  placeholder,
+  type,
+  register,
+  rules,
+  error
+}: InputProps<T>) {
+  return (
     <div>
       <input
         className="w-full border-2 rounded-md h-11 px-2"

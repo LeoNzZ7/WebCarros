@@ -33,10 +33,10 @@ export const Login = () => {
                     <div className="mb-3" >
                         <Input
                             type="email"
-                            placeholder="Digite seu email "
+                            placeholder="Enter your email"
                             name="email"
-                            error={errors.email?.message}
                             register={register}
+                            error={errors.email?.message}
                         />
                     </div>
                     <div className="mb-3" >
