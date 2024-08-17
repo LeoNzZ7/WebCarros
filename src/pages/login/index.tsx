@@ -1,10 +1,13 @@
 import { Container } from "../../components/container"
 import logoImg from "../../assets/logo.svg"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { Input } from "../../components/inputComponent"
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { signInWithEmailAndPassword } from "firebase/auth"
+import { auth } from "../../services/firebaseConnection"
+import { useEffect } from "react"
 
 const schema = z.object({
     email: z.string().email("Insira um email valido").min(1, "Este campo é obrigatório"),
@@ -19,9 +22,25 @@ export const Login = () => {
         mode: "onChange"
     })
 
-    function onSubmit(data: FormData) {
-        console.log(data)
+    const navigate = useNavigate()
+
+    async function onSubmit(data: FormData) {
+        await signInWithEmailAndPassword(auth, data.email, data.password)
+            .then(() => {
+                navigate("/", { replace: true })
+                console.log("Login realizado com sucesso!")
+            }).catch((error) => {
+                console.log(error)
+            })
     }
+
+    useEffect(() => {
+        async function handleLogout() {
+            await auth.signOut()
+        }
+
+        handleLogout()
+    })
 
     return (
         <Container>
@@ -55,6 +74,9 @@ export const Login = () => {
                         Acessar
                     </button>
                 </form>
+                <Link to="/register" >
+                    Ainda não tem uma conta? cadastra-se
+                </Link>
             </div>
         </Container>
     )
