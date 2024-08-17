@@ -7,10 +7,11 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth"
 import { auth } from "../../services/firebaseConnection"
-import { useEffect } from "react"
+import { useContext, useEffect } from "react"
+import { AuthContext } from "../../contexts/authContext"
 
 const schema = z.object({
-    name: z.string().min(1, "Este campo é obrigatório").optional(),
+    name: z.string().min(1, "Este campo é obrigatório"),
     email: z.string().email("Insira um email valido").min(1, "Este campo é obrigatório"),
     password: z.string().min(6, "Sua senha deve ter no mínimo 6 caracteres"),
 })
@@ -23,6 +24,8 @@ export const Register = () => {
         mode: "onChange"
     })
 
+    const { handleInfoUser } = useContext(AuthContext)
+
     const navigate = useNavigate()
 
     async function onSubmit(data: FormData) {
@@ -32,7 +35,11 @@ export const Register = () => {
                     displayName: data.name,
                 })
 
-                console.log("User signed in successfully!");
+                handleInfoUser({
+                    displayName: data.name,
+                    email: data.email,
+                    uid: user.user.uid,
+                })
                 navigate("/dashboard", { replace: true })
             }).catch((error) => {
                 console.log(error)
