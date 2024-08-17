@@ -3,7 +3,7 @@ import { createContext, ReactNode, useEffect, useState } from "react";
 import { auth } from "../services/firebaseConnection";
 
 type AuthContextData = {
-    singed: boolean;
+    signed: boolean;
     loadingAuth: boolean;
 }
 
@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }, [])
 
     return (
-        <AuthContext.Provider value={{ singed: !!user, loadingAuth }} >
+        <AuthContext.Provider value={{ signed: !!user, loadingAuth }} >
             {children}
         </AuthContext.Provider>
     )

@@ -6,14 +6,15 @@ import { Dashboard } from "./pages/dashbord";
 import { New } from "./pages/dashbord/new";
 import { Register } from "./pages/register";
 import { Login } from "./pages/login";
+import { Private } from "./routes/private";
 
 const router = createBrowserRouter([
   {
     element: <Layout />, children: [
       { path: "/", element: <Home /> },
       { path: "/car:id", element: <Car /> },
-      { path: "/dashboard", element: <Dashboard /> },
-      { path: "/dashboard/new", element: <New /> },
+      { path: "/dashboard", element: <Private><Dashboard /></Private> },
+      { path: "/dashboard/new", element: <Private><New /></Private> },
 
     ]
   },
