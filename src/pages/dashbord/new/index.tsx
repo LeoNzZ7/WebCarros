@@ -8,8 +8,9 @@ import { Input } from "../../../components/inputComponent"
 import { ChangeEvent, useContext, useState } from "react"
 import { AuthContext } from "../../../contexts/authContext"
 import { v4 as uuidV4 } from "uuid"
-import { storage } from "../../../services/firebaseConnection"
+import { db, storage } from "../../../services/firebaseConnection"
 import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage"
+import { addDoc, collection } from "firebase/firestore"
 
 const schema = z.object({
     name: z.string().min(1, "O campo nome é obrigatório"),
@@ -43,8 +44,39 @@ export const New = () => {
 
     const { user } = useContext(AuthContext);
 
-    function onsubmit(data: FormData) {
-        console.log(data)
+    async function onsubmit(data: FormData) {
+        if (carImages.length === 0) {
+            return alert("Envie alguma image desse carro")
+        }
+
+        const carListImages = carImages.map(image => {
+            return {
+                uid: image.uid,
+                name: image.name,
+                url: image.url
+            }
+        })
+
+        await addDoc(collection(db, "cars"), {
+            name: data.name,
+            model: data.model,
+            year: data.year,
+            km: data.km,
+            price: data.price,
+            city: data.city,
+            whatsapp: data.whatsapp,
+            description: data.description,
+            createdAt: new Date(),
+            owner: user?.displayName,
+            userId: user?.uid,
+            images: carListImages
+        }).then(() => {
+            reset()
+            setCarImages([])
+            console.log("Cadastrado com sucesso")
+        }).then((error) => {
+            console.log(error)
+        })
     }
 
     async function handleFile(e: ChangeEvent<HTMLInputElement>) {
@@ -90,8 +122,8 @@ export const New = () => {
         try {
             await deleteObject(imageRef)
         }
-        catch (err: any) {
-            console.error("Error removing image: ", err.message);
+        catch (err: unknown) {
+            console.error("Error removing image: ", err);
         }
     }
 
