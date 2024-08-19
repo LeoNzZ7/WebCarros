@@ -1,7 +1,10 @@
+import { Container } from "../../components/container"
+import { DashboardHeader } from "../../components/painelHeader"
+
 export const Dashboard = () => {
     return (
-        <div>
-            Página Home
-        </div>
+        <Container>
+            <DashboardHeader />
+        </Container>
     )
 }
