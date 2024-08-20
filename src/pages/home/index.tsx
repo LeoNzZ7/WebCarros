@@ -27,6 +27,7 @@ interface CarsImagesProps {
 export const Home = () => {
     const [cars, setCars] = useState<CarsProps[] | []>([])
     const [loading, setLoading] = useState(false)
+    const [loadingImages, setLoadingImages] = useState<string[] | []>([])
 
     useEffect(() => {
         async function loadCars() {
@@ -63,6 +64,10 @@ export const Home = () => {
         loadCars()
     }, [])
 
+    function handleImageLoad(id: string) {
+        setLoadingImages((prevImageLoads) => [...prevImageLoads, id])
+    }
+
     return (
         <Container>
             <section className="bg-white p-4 rounded-lg w-full max-w-3xl mx-auto flex justify-center items-center gap" >
@@ -86,10 +91,19 @@ export const Home = () => {
                 {cars.length && !loading && cars.map((car) => (
                     <Link key={car.id} to={`/car/${car.id}`} >
                         <section className="w-full bg-white rounded-lg cursor-pointer" >
+                            <div
+                                style={{ display: loadingImages.includes(car.id as never) ? 'none' : 'flex' }}
+                                className="w-full h-72 rounded-lg bg-slate-200 font-bold text-center text-2xl justify-center items-center"
+                            >
+                                <FaSpinner className="text-red-500 text-4xl animate-spin" />
+                                <span className="ml-2 text-gray-700 text-lg">Carregando...</span>
+                            </div>
                             <img
+                                style={{ display: loadingImages.includes(car.id as never) ? 'block' : 'none' }}
                                 className="w-full rounded-lg mb-2 max-h-72 object-cover hover:scale-105 transition-all"
                                 alt="Foto do carro"
                                 src={car.images[0].url}
+                                onLoad={() => handleImageLoad(car.id)}
                             />
                             <p className="font-bold mt-1 mb-2 px-2" >{car.name}</p>
                             <div className="flex flex-col px-2" >
