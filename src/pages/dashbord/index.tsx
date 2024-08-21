@@ -3,8 +3,9 @@ import { Container } from "../../components/container"
 import { DashboardHeader } from "../../components/painelHeader"
 import { useContext, useEffect, useState } from "react"
 import { collection, deleteDoc, doc, getDocs, query, where } from "firebase/firestore"
-import { db } from "../../services/firebaseConnection"
+import { db, storage } from "../../services/firebaseConnection"
 import { AuthContext } from "../../contexts/authContext"
+import { deleteObject, ref } from "firebase/storage"
 
 interface CarsProps {
     id: string
@@ -65,10 +66,17 @@ export const Dashboard = () => {
         loadCars()
     }, [user])
 
-    async function handleDeleteCar(id: string) {
-        const docRef = doc(db, "cars", id)
+    async function handleDeleteCar(car: CarsProps) {
+        const docRef = doc(db, "cars", car.id)
         await deleteDoc(docRef).then(() => {
-            setCars(cars.filter(car => car.id !== id))
+            car.images.map(async (image) => {
+                const imagePath = `images/${user?.uid}/${image.name}`
+                const imageRef = ref(storage, imagePath)
+
+                await deleteObject(imageRef).then(() => {
+                    setCars(cars.filter(car => car.id !== car.id))
+                }).catch((error) => console.log(error))
+            })
         })
     }
 
@@ -80,7 +88,7 @@ export const Dashboard = () => {
                 {cars && cars.map((car) => (
                     <section key={car.id} className="w-full bg-white rounded-lg relative" >
                         <button
-                            onClick={() => handleDeleteCar(car.id)}
+                            onClick={() => handleDeleteCar(car)}
                             className="absolute bg-white w-14 h-14 rounded-full flex items-center justify-center right-2 top-2 drop-shadow"
                         >
                             <FiTrash2
