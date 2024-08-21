@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Container } from "../../components/container"
-import { collection, getDocs, orderBy, query } from "firebase/firestore"
+import { collection, getDocs, orderBy, query, where } from "firebase/firestore"
 import { db } from "../../services/firebaseConnection"
 import { FaSpinner } from "react-icons/fa"
 import { Link } from "react-router-dom"
@@ -10,54 +10,103 @@ export const Home = () => {
     const [cars, setCars] = useState<CarsProps[] | []>([])
     const [loading, setLoading] = useState(false)
     const [loadingImages, setLoadingImages] = useState<string[] | []>([])
+    const [input, setInput] = useState("")
 
     useEffect(() => {
-        async function loadCars() {
-            setLoading(true)
-            const carsRef = collection(db, "cars")
-            const queryRef = query(carsRef, orderBy("createdAt", "desc"))
 
-            await getDocs(queryRef).then((snapshot) => {
-                const listCars = [] as CarsProps[]
-
-                snapshot.forEach((doc) => {
-                    listCars.push({
-                        id: doc.id,
-                        userId: doc.data().userId,
-                        name: doc.data().name,
-                        model: doc.data().model,
-                        year: doc.data().year,
-                        km: doc.data().km,
-                        price: doc.data().price,
-                        city: doc.data().city,
-                        images: doc.data().images,
-                        owner: doc.data().owner
-                    })
-                })
-
-                setCars(listCars)
-                setLoading(false)
-            }).catch((error) => {
-                console.log("Error fetching documents: ", error);
-                setLoading(false)
-            })
-        }
 
         loadCars()
     }, [])
 
+    async function loadCars() {
+        setLoading(true)
+        const carsRef = collection(db, "cars")
+        const queryRef = query(carsRef, orderBy("createdAt", "desc"))
+
+        await getDocs(queryRef).then((snapshot) => {
+            const listCars = [] as CarsProps[]
+
+            snapshot.forEach((doc) => {
+                listCars.push({
+                    id: doc.id,
+                    userId: doc.data().userId,
+                    name: doc.data().name,
+                    model: doc.data().model,
+                    year: doc.data().year,
+                    km: doc.data().km,
+                    price: doc.data().price,
+                    city: doc.data().city,
+                    images: doc.data().images,
+                    owner: doc.data().owner
+                })
+            })
+
+            setCars(listCars)
+            setLoading(false)
+        }).catch((error) => {
+            console.log("Error fetching documents: ", error);
+            setLoading(false)
+        })
+    }
+
     function handleImageLoad(id: string) {
         setLoadingImages((prevImageLoads) => [...prevImageLoads, id])
+    }
+
+    async function handleSearchCar() {
+        setLoading(true)
+
+        if (input === "") {
+            loadCars()
+            return
+        }
+
+        setCars([])
+        setLoadingImages([])
+
+        const q = query(collection(db, "cars"),
+            where("name", ">=", input.toUpperCase()),
+            where("name", "<=", input.toUpperCase() + "\uf8ff")
+        )
+
+        const querySnapshot = await getDocs(q)
+
+        const listCars = [] as CarsProps[]
+
+        querySnapshot.forEach((doc) => {
+            listCars.push({
+                id: doc.id,
+                userId: doc.data().userId,
+                name: doc.data().name,
+                model: doc.data().model,
+                year: doc.data().year,
+                km: doc.data().km,
+                price: doc.data().price,
+                city: doc.data().city,
+                images: doc.data().images,
+                owner: doc.data().owner
+            })
+        })
+
+        setCars(listCars)
+        setLoading(false)
     }
 
     return (
         <Container>
             <section className="bg-white p-4 rounded-lg w-full max-w-3xl mx-auto flex justify-center items-center gap" >
                 <input
+                    value={input}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
                     className="w-full border-2 rounded-lg h-9 px-3 outline-none rounded-r-none border-r-0"
                     type="text"
                     placeholder="Digite o nome do veiculo" />
-                <button className="bg-red-500 h-9 px-8 rounded-lg rounded-l-none font-medium transition-colors hover:bg-red-600 text-white" >Buscar</button>
+                <button
+                    className="bg-red-500 h-9 px-8 rounded-lg rounded-l-none font-medium transition-colors hover:bg-red-600 text-white"
+                    onClick={handleSearchCar}
+                >
+                    Buscar
+                </button>
             </section>
 
             <h1 className="font-bold text-center mt-8 text-2xl mb-4" >
