@@ -4,25 +4,7 @@ import { collection, getDocs, orderBy, query } from "firebase/firestore"
 import { db } from "../../services/firebaseConnection"
 import { FaSpinner } from "react-icons/fa"
 import { Link } from "react-router-dom"
-
-interface CarsProps {
-    id: string
-    userId: string
-    name: string
-    model: string
-    year: string
-    km: string
-    price: string
-    city: string
-    images: CarsImagesProps[]
-    owner: string
-}
-
-interface CarsImagesProps {
-    userId: string
-    name: string
-    url: string
-}
+import { CarsProps } from "../../types/carTypes"
 
 export const Home = () => {
     const [cars, setCars] = useState<CarsProps[] | []>([])

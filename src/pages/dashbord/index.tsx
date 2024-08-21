@@ -6,25 +6,7 @@ import { collection, deleteDoc, doc, getDocs, query, where } from "firebase/fire
 import { db, storage } from "../../services/firebaseConnection"
 import { AuthContext } from "../../contexts/authContext"
 import { deleteObject, ref } from "firebase/storage"
-
-interface CarsProps {
-    id: string
-    userId: string
-    name: string
-    model: string
-    year: string
-    km: string
-    price: string
-    city: string
-    images: CarsImagesProps[]
-    owner: string
-}
-
-interface CarsImagesProps {
-    userId: string
-    name: string
-    url: string
-}
+import { CarsProps } from "../../types/carTypes"
 
 export const Dashboard = () => {
     const [cars, setCars] = useState<CarsProps[] | []>([])
@@ -100,7 +82,7 @@ export const Dashboard = () => {
                             className="w-full rounded-lg mb-2 max-h-78"
                             src={car.images[0].url}
                         />
-                        <p className="font-bold mt-1 px-2 mb-2" >Nissa versa</p>
+                        <p className="font-bold mt-1 px-2 mb-2" >{car.name}</p>
                         <div className="flex flex-col px-2" >
                             <span className="text-zinc-700" >
                                 ano {car.year} | {car.km}Km
