@@ -1,149 +1,132 @@
-import { FiTrash, FiUpload } from "react-icons/fi"
-import { Container } from "../../../components/container"
-import { DashboardHeader } from "../../../components/painelHeader"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { Input } from "../../../components/inputComponent"
-import { ChangeEvent, useContext, useState } from "react"
-import { AuthContext } from "../../../contexts/authContext"
-import { v4 as uuidV4 } from "uuid"
-import { db, storage } from "../../../services/firebaseConnection"
-import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage"
-import { addDoc, collection } from "firebase/firestore"
-import toast from "react-hot-toast"
-import { FirebaseError } from "firebase/app"
+import React, { useState, useCallback, useContext } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { FiTrash, FiUpload } from 'react-icons/fi';
+import { v4 as uuidV4 } from 'uuid';
+import { addDoc, collection } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import toast from 'react-hot-toast';
+
+import { Container } from '../../../components/container';
+import { DashboardHeader } from '../../../components/painelHeader';
+import { Input } from '../../../components/inputComponent';
+import { db, storage } from '../../../services/firebaseConnection';
+import { AuthContext } from '../../../contexts/authContext';
 
 const schema = z.object({
-    name: z.string().min(1, "O campo nome é obrigatório"),
-    model: z.string().min(1, "O campo modelo é obrigatório"),
-    year: z.string().min(1, "O campo ano é obrigatório"),
-    km: z.string().min(1, "O campo de quilometragem do carro é obrigatório"),
-    price: z.string().min(1, "O campo de preço do carro é obrigatório"),
-    city: z.string().min(1, "O campo da cidade do carro é obrigatório"),
-    whatsapp: z.string().min(1, "o campo de telefone é obrigatório").refine((value) => /^(\d{11,12})$/.test(value), {
-        message: "Número de telefone inválido"
-    }),
-    description: z.string().min(1, "O campo de descrição do carro é obrigatório")
-})
+    name: z.string().min(1, 'O campo nome é obrigatório'),
+    model: z.string().min(1, 'O campo modelo é obrigatório'),
+    year: z.string().min(1, 'O campo ano é obrigatório'),
+    km: z.string().min(1, 'O campo de quilometragem do carro é obrigatório'),
+    price: z.string().min(1, 'O campo de preço do carro é obrigatório'),
+    city: z.string().min(1, 'O campo da cidade do carro é obrigatório'),
+    whatsapp: z.string().min(1, 'O campo de telefone é obrigatório').regex(/^(\d{11,12})$/, 'Número de telefone inválido'),
+    description: z.string().min(1, 'O campo de descrição do carro é obrigatório')
+});
 
-type FormData = z.infer<typeof schema>
+type FormData = z.infer<typeof schema>;
 
-interface ImageItemProps {
-    uid: string
-    name: string
-    previewUrl: string
-    url: string
+interface ImageItem {
+    uid: string;
+    name: string;
+    previewUrl: string;
+    url: string;
 }
 
-export const New = () => {
+export const New: React.FC = () => {
     const { register, handleSubmit, formState: { errors }, reset } = useForm<FormData>({
         resolver: zodResolver(schema),
-        mode: "onChange"
-    })
+        mode: 'onChange'
+    });
 
-    const [carImages, setCarImages] = useState<ImageItemProps[]>([])
-
+    const [carImages, setCarImages] = useState<ImageItem[]>([]);
     const { user } = useContext(AuthContext);
 
-    async function onsubmit(data: FormData) {
+    const onSubmit = useCallback(async (data: FormData) => {
         if (carImages.length === 0) {
-            toast.error("É necessário cadastrar uma imagem para esse veículo")
-            return
-        }
-
-        const carListImages = carImages.map(image => {
-            return {
-                uid: image.uid,
-                name: image.name,
-                url: image.url
-            }
-        })
-
-        await addDoc(collection(db, "cars"), {
-            name: data.name.toUpperCase(),
-            model: data.model,
-            year: data.year,
-            km: data.km,
-            price: data.price,
-            city: data.city,
-            whatsapp: data.whatsapp,
-            description: data.description,
-            createdAt: new Date(),
-            owner: user?.displayName,
-            userId: user?.uid,
-            images: carListImages
-        }).then(() => {
-            reset()
-            setCarImages([])
-            toast.success("Veículo cadastrado com sucesso!")
-        }).catch((error) => {
-            if (error instanceof FirebaseError) {
-                switch (error.code) {
-                    case 'permission-denied':
-                        toast.error("Você não tem permissão para cadastrar veículos.");
-                        break;
-                    case 'quota-exceeded':
-                        toast.error("Limite de cadastros excedido. Tente novamente mais tarde.");
-                        break;
-                    default:
-                        toast.error("Erro ao cadastrar o veículo. Por favor, tente novamente.");
-                }
-            } else {
-                toast.error("Ocorreu um erro inesperado. Por favor, tente novamente.");
-            }
-            console.error("Erro ao cadastrar veículo:", error);
-        })
-    }
-
-    async function handleFile(e: ChangeEvent<HTMLInputElement>) {
-        if (e.target.files && e.target.files[0]) {
-            const image = e.target.files[0]
-
-            if (image.type === "image/jpeg" || image.type === "image/png") {
-                await handleUpload(image)
-            } else {
-                alert("Formato da imagem invalido, só são permitidos imagens com o formato jpeg ou png")
-            }
-        }
-    }
-
-    async function handleUpload(image: File) {
-        if (!user?.uid) {
+            toast.error('É necessário cadastrar uma imagem para esse veículo');
             return;
         }
 
-        const currentUid = user.uid;
-        const uidImage = uuidV4()
-
-        const uploadRef = ref(storage, `images/${currentUid}/${uidImage}`)
-        await uploadBytes(uploadRef, image).then((snapshot) => {
-            getDownloadURL(snapshot.ref).then((downloadUrl) => {
-                const imageItem = {
-                    name: uidImage,
-                    uid: currentUid,
-                    previewUrl: URL.createObjectURL(image),
-                    url: downloadUrl,
-                }
-
-                toast.success("Imagem cadastrado com sucesso!")
-                setCarImages((images) => [...images, imageItem])
-            })
-        })
-    }
-
-    async function handleDeleteImage(item: ImageItemProps) {
-        const imagePath = `images/${item.uid}/${item.name}`
-
-        const imageRef = ref(storage, imagePath)
-        setCarImages(carImages.filter((car) => car.url !== item.url))
         try {
-            await deleteObject(imageRef)
+            const carListImages = carImages.map(image => ({
+                uid: image.uid,
+                name: image.name,
+                url: image.url
+            }));
+
+            await addDoc(collection(db, 'cars'), {
+                name: data.name.toUpperCase(),
+                model: data.model,
+                year: data.year,
+                km: data.km,
+                price: data.price,
+                city: data.city,
+                whatsapp: data.whatsapp,
+                description: data.description,
+                created_at: new Date(),
+                owner: user?.displayName,
+                uid: user?.uid,
+                images: carListImages
+            });
+
+            reset();
+            setCarImages([]);
+            toast.success('Veículo cadastrado com sucesso!');
+        } catch (error) {
+            console.error('Erro ao cadastrar veículo:', error);
+            toast.error('Erro ao cadastrar o veículo. Por favor, tente novamente.');
         }
-        catch (err: unknown) {
-            console.error("Error removing image: ", err);
+    }, [carImages, reset, user]);
+
+    const handleFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const image = e.target.files[0];
+            if (image.type === 'image/jpeg' || image.type === 'image/png') {
+                await handleUpload(image);
+            } else {
+                toast.error('Formato da imagem inválido. Use apenas JPEG ou PNG.');
+            }
         }
-    }
+    }, []);
+
+    const handleUpload = useCallback(async (image: File) => {
+        if (!user?.uid) return;
+
+        const uidImage = uuidV4();
+        const uploadRef = ref(storage, `images/${user.uid}/${uidImage}`);
+
+        try {
+            const snapshot = await uploadBytes(uploadRef, image);
+            const downloadUrl = await getDownloadURL(snapshot.ref);
+
+            const imageItem = {
+                name: uidImage,
+                uid: user.uid,
+                previewUrl: URL.createObjectURL(image),
+                url: downloadUrl,
+            };
+
+            setCarImages(prev => [...prev, imageItem]);
+            toast.success('Imagem cadastrada com sucesso!');
+        } catch (error) {
+            console.error('Erro ao fazer upload da imagem:', error);
+            toast.error('Erro ao cadastrar imagem. Por favor, tente novamente.');
+        }
+    }, [user]);
+
+    const handleDeleteImage = useCallback(async (item: ImageItem) => {
+        try {
+            const imageRef = ref(storage, `images/${item.uid}/${item.name}`);
+            await deleteObject(imageRef);
+            setCarImages(prev => prev.filter(car => car.url !== item.url));
+            toast.success('Imagem removida com sucesso!');
+        } catch (error) {
+            console.error('Erro ao remover imagem:', error);
+            toast.error('Erro ao remover imagem. Por favor, tente novamente.');
+        }
+    }, []);
 
     return (
         <Container>
@@ -174,7 +157,7 @@ export const New = () => {
             <div className="w-full bg-white p-3 rounded-lg flex flex-col sm:flex-row items-center mt-2" >
                 <form
                     className="w-full "
-                    onSubmit={handleSubmit(onsubmit)}
+                    onSubmit={handleSubmit(onSubmit)}
                 >
                     <div className="mb-3" >
                         <p className="mb-2 font-medium">
@@ -281,5 +264,5 @@ export const New = () => {
                 </form>
             </div>
         </Container>
-    )
-}
+    );
+};
