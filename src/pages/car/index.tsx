@@ -129,7 +129,7 @@ export const Car = () => {
                         <strong>Telefone / WhatsApp</strong>
                         <p>{car.whatsapp}</p>
                         <a
-                            href={`https://api.whatsapp.com/send?phone${car.whatsapp}&text=Olá vi esse ${car.name} e fiquei interessado! poderia me dar mais detalhes?`}
+                            href={`https://api.whatsapp.com/send?phone${car.whatsapp}&text=Olá vi esse ${car.name} - https://web-carros-ochre.vercel.app/car/${car.id} e fiquei interessado! poderia me dar mais detalhes?`}
                             target="_blank"
                             className="bg-green-500 w-full text-white flex items-center justify-center gap-2 my-6 h-11 text-xl rounded-lg cursor-pointer font-medium" >
                             Conversar com vendedor
