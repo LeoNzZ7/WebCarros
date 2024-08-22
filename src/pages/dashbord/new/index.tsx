@@ -11,6 +11,8 @@ import { v4 as uuidV4 } from "uuid"
 import { db, storage } from "../../../services/firebaseConnection"
 import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage"
 import { addDoc, collection } from "firebase/firestore"
+import toast from "react-hot-toast"
+import { FirebaseError } from "firebase/app"
 
 const schema = z.object({
     name: z.string().min(1, "O campo nome é obrigatório"),
@@ -46,7 +48,8 @@ export const New = () => {
 
     async function onsubmit(data: FormData) {
         if (carImages.length === 0) {
-            return alert("Envie alguma image desse carro")
+            toast.error("É necessário cadastrar uma imagem para esse veículo")
+            return
         }
 
         const carListImages = carImages.map(image => {
@@ -73,9 +76,23 @@ export const New = () => {
         }).then(() => {
             reset()
             setCarImages([])
-            console.log("Cadastrado com sucesso")
-        }).then((error) => {
-            console.log(error)
+            toast.success("Veículo cadastrado com sucesso!")
+        }).catch((error) => {
+            if (error instanceof FirebaseError) {
+                switch (error.code) {
+                    case 'permission-denied':
+                        toast.error("Você não tem permissão para cadastrar veículos.");
+                        break;
+                    case 'quota-exceeded':
+                        toast.error("Limite de cadastros excedido. Tente novamente mais tarde.");
+                        break;
+                    default:
+                        toast.error("Erro ao cadastrar o veículo. Por favor, tente novamente.");
+                }
+            } else {
+                toast.error("Ocorreu um erro inesperado. Por favor, tente novamente.");
+            }
+            console.error("Erro ao cadastrar veículo:", error);
         })
     }
 
@@ -109,6 +126,7 @@ export const New = () => {
                     url: downloadUrl,
                 }
 
+                toast.success("Imagem cadastrado com sucesso!")
                 setCarImages((images) => [...images, imageItem])
             })
         })

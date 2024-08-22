@@ -4,18 +4,20 @@ import { useNavigate, useParams } from "react-router-dom"
 import { CarsProps } from "../../types/carTypes"
 import { doc, getDoc } from "firebase/firestore"
 import { db } from "../../services/firebaseConnection"
-import { FaWhatsapp } from "react-icons/fa"
+import { FaSpinner, FaWhatsapp } from "react-icons/fa"
 import { Swiper, SwiperSlide } from "swiper/react"
 
 export const Car = () => {
     const [car, setCar] = useState<CarsProps>()
     const [slidersPreview, setSlidersPreview] = useState<number>(2)
+    const [loading, setLoading] = useState(false)
 
     const { id } = useParams()
     const navigate = useNavigate()
 
     useEffect(() => {
         async function loadCar() {
+            setLoading(true)
             if (!id) {
                 return
             }
@@ -42,6 +44,8 @@ export const Car = () => {
                     whatsapp: snapshot.data()?.whatsapp
                 })
             })
+
+            setLoading(false)
         }
 
         loadCar()
@@ -61,6 +65,15 @@ export const Car = () => {
         window.addEventListener("resize", handleResize)
 
     }, [])
+
+    if (loading && !car) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <FaSpinner className="text-red-500 text-4xl animate-spin" />
+                <span className="ml-2 text-gray-700 text-lg">Carregando...</span>
+            </div>
+        )
+    }
 
     return (
         <Container>

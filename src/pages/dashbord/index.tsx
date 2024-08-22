@@ -7,6 +7,8 @@ import { db, storage } from "../../services/firebaseConnection"
 import { AuthContext } from "../../contexts/authContext"
 import { deleteObject, ref } from "firebase/storage"
 import { CarsProps } from "../../types/carTypes"
+import { Link } from "react-router-dom"
+import toast from "react-hot-toast"
 
 export const Dashboard = () => {
     const [cars, setCars] = useState<CarsProps[] | []>([])
@@ -56,7 +58,8 @@ export const Dashboard = () => {
                 const imageRef = ref(storage, imagePath)
 
                 await deleteObject(imageRef).then(() => {
-                    setCars(cars.filter(car => car.id !== car.id))
+                    toast.success("Veículo excluído com sucesso")
+                    setCars(cars.filter(carItem => carItem.id !== car.id))
                 }).catch((error) => console.log(error))
             })
         })
@@ -78,22 +81,25 @@ export const Dashboard = () => {
                                 color="#000"
                             />
                         </button>
-                        <img
-                            className="w-full rounded-lg mb-2 max-h-78"
-                            src={car.images[0].url}
-                        />
-                        <p className="font-bold mt-1 px-2 mb-2" >{car.name}</p>
-                        <div className="flex flex-col px-2" >
-                            <span className="text-zinc-700" >
-                                ano {car.year} | {car.km}Km
-                            </span>
-                            <strong className="text-black font-bold mt-4" >{Number(car.price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>
-                        </div>
-                        <div className="w-full h-px bg-slate-200 my-2" ></div>
-                        <div className="px-2 pb-2">
-                            <span className="text-black" >{car.city}</span>
-                        </div>
+                        <Link to={`/car/${car.id}`}>
+                            <img
+                                className="w-full rounded-lg mb-2 max-h-78"
+                                src={car.images[0].url}
+                            />
+                            <p className="font-bold mt-1 px-2 mb-2" >{car.name}</p>
+                            <div className="flex flex-col px-2" >
+                                <span className="text-zinc-700" >
+                                    ano {car.year} | {car.km}Km
+                                </span>
+                                <strong className="text-black font-bold mt-4" >{Number(car.price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>
+                            </div>
+                            <div className="w-full h-px bg-slate-200 my-2" ></div>
+                            <div className="px-2 pb-2">
+                                <span className="text-black" >{car.city}</span>
+                            </div>
+                        </Link>
                     </section>
+
                 ))}
 
             </main>

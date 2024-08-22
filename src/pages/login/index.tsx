@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { signInWithEmailAndPassword } from "firebase/auth"
 import { auth } from "../../services/firebaseConnection"
 import { useEffect } from "react"
+import toast from "react-hot-toast"
 
 const schema = z.object({
     email: z.string().email("Insira um email valido").min(1, "Este campo é obrigatório"),
@@ -28,9 +29,27 @@ export const Login = () => {
         await signInWithEmailAndPassword(auth, data.email, data.password)
             .then(() => {
                 navigate("/", { replace: true })
-                console.log("Login realizado com sucesso!")
+                toast.success("Logado com sucesso!")
             }).catch((error) => {
-                console.log(error)
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                        toast.error("Usuário não encontrado. Verifique o email e tente novamente.");
+                        break;
+                    case 'auth/wrong-password':
+                        toast.error("Senha incorreta. Por favor, tente novamente.");
+                        break;
+                    case 'auth/invalid-email':
+                        toast.error("Email inválido. Por favor, verifique o endereço de email.");
+                        break;
+                    case 'auth/user-disabled':
+                        toast.error("Esta conta foi desativada. Entre em contato com o suporte.");
+                        break;
+                    case 'auth/too-many-requests':
+                        toast.error("Muitas tentativas de login. Por favor, tente novamente mais tarde.");
+                        break;
+                    default:
+                        toast.error("Falha ao fazer login. Por favor, tente novamente.");
+                }
             })
     }
 

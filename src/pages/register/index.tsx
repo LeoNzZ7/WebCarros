@@ -9,6 +9,7 @@ import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth"
 import { auth } from "../../services/firebaseConnection"
 import { useContext, useEffect } from "react"
 import { AuthContext } from "../../contexts/authContext"
+import toast from "react-hot-toast"
 
 const schema = z.object({
     name: z.string().min(1, "Este campo é obrigatório"),
@@ -41,8 +42,21 @@ export const Register = () => {
                     uid: user.user.uid,
                 })
                 navigate("/dashboard", { replace: true })
+                toast.success("Bem vindo a WebMotors")
             }).catch((error) => {
-                console.log(error)
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        toast.error("Este email já está em uso. Por favor, use outro email.");
+                        break;
+                    case 'auth/invalid-email':
+                        toast.error("Email inválido. Por favor, verifique o endereço de email.");
+                        break;
+                    case 'auth/weak-password':
+                        toast.error("Senha fraca. Use uma senha mais forte.");
+                        break;
+                    default:
+                        toast.error("Falha no registro. Por favor, tente novamente.");
+                }
             })
     }
 
