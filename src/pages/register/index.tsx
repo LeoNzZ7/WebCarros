@@ -42,7 +42,7 @@ export const Register = () => {
                     uid: user.user.uid,
                 })
                 navigate("/dashboard", { replace: true })
-                toast.success("Bem vindo a WebMotors")
+                toast.success("Bem vindo a WebCarros")
             }).catch((error) => {
                 switch (error.code) {
                     case 'auth/email-already-in-use':
