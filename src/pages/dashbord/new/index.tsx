@@ -65,7 +65,7 @@ export const New: React.FC = () => {
                 city: data.city,
                 whatsapp: data.whatsapp,
                 description: data.description,
-                created_at: new Date(),
+                createdAt: new Date(),
                 owner: user?.displayName,
                 uid: user?.uid,
                 images: carListImages

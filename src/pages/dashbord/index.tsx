@@ -12,7 +12,6 @@ import toast from "react-hot-toast"
 
 export const Dashboard = () => {
     const [cars, setCars] = useState<CarsProps[] | []>([])
-
     const { user } = useContext(AuthContext)
 
     useEffect(() => {
@@ -22,7 +21,7 @@ export const Dashboard = () => {
             }
 
             const carsRef = collection(db, "cars")
-            const queryRef = query(carsRef, where("userId", "==", user.uid));
+            const queryRef = query(carsRef, where("uid", "==", user.uid));
 
             await getDocs(queryRef).then((snapshot) => {
                 const listCars = [] as CarsProps[]
