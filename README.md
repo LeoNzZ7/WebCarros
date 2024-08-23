@@ -2,7 +2,7 @@
 
 ## Sobre o Projeto
 
-WebCarros é uma aplicação web inovadora para compra e venda de carros, onde os usuários podem criar contas, cadastrar veículos e interagir diretamente com vendedores. Este projeto foi desenvolvido com o objetivo de aplicar e demonstrar conhecimentos avançados em desenvolvimento web, utilizando tecnologias modernas e práticas de mercado.
+WebCarros é uma aplicação web para compra e venda de carros, onde os usuários podem criar contas, cadastrar veículos e interagir diretamente com vendedores. Este projeto foi desenvolvido com o objetivo de aplicar e demonstrar conhecimentos avançados em desenvolvimento web, utilizando tecnologias modernas e práticas de mercado.
 
 ## Tecnologias Utilizadas
 
@@ -52,7 +52,7 @@ VITE_FIREBASE_APP_ID=seu_app_id
 
 ## Demonstração do Projeto
 
-Substitua "SEU_VIDEO_ID" pelo ID do seu vídeo no YouTube ou use o código de incorporação fornecido pela plataforma de vídeo de sua escolha.
+![WebCarrosGif](https://github.com/LeoNzZ7/WebCarros/blob/main/WebCarros.gif)
 
 ## Contribuição
 
